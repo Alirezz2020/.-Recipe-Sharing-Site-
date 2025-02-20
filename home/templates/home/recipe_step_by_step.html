@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Step-by-Step: {{ object.title }} - RecipeShare{% endblock %}
+
+{% block content %}
+  <h2>Step-by-Step Mode: {{ object.title }}</h2>
+  <div id="steps">
+    {% for step in object.instructions.splitlines %}
+      <div class="step" style="display: none;">
+        <p>{{ step }}</p>
+      </div>
+    {% endfor %}
+  </div>
+  <button id="prev" class="btn btn-secondary">Previous</button>
+  <button id="next" class="btn btn-primary">Next</button>
+
+  <script>
+    const steps = document.querySelectorAll('.step');
+    let currentStep = 0;
+    function showStep(index) {
+      steps.forEach((step, i) => {
+        step.style.display = (i === index) ? 'block' : 'none';
+      });
+    }
+    showStep(currentStep);
+    document.getElementById('prev').addEventListener('click', function() {
+      if (currentStep > 0) { currentStep--; showStep(currentStep); }
+    });
+    document.getElementById('next').addEventListener('click', function() {
+      if (currentStep < steps.length - 1) { currentStep++; showStep(currentStep); }
+    });
+  </script>
+{% endblock %}

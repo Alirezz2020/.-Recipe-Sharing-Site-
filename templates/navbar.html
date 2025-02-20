@@ -9,9 +9,25 @@
       <ul class="navbar-nav ms-auto">
         {% if user.is_authenticated %}
           <li class="nav-item">
-           <li class="nav-item">
             <a class="nav-link" href="{% url 'home:dashboard' %}">Dashboard</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'home:favorites' %}">Favorites</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+              Notifications
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              {% for notification in user.notifications.all|dictsortreversed:"created_at"|slice:":5" %}
+                <li><a class="dropdown-item" href="{{ notification.url }}">{{ notification.message }}</a></li>
+              {% empty %}
+                <li><span class="dropdown-item">No notifications</span></li>
+              {% endfor %}
+              <li><a class="dropdown-item" href="{% url 'home:notifications' %}">See all</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="{% url 'accounts:profile' %}">Profile</a>
           </li>
           <li class="nav-item">

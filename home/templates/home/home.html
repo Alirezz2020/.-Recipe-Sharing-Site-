@@ -4,6 +4,14 @@
 
 {% block content %}
   <h1 class="mb-4">Latest Recipes</h1>
+  <form method="get" class="mb-4">
+    <div class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Search recipes..." value="{{ request.GET.q }}">
+      <input type="text" name="category" class="form-control" placeholder="Category" value="{{ request.GET.category }}">
+      <input type="text" name="tag" class="form-control" placeholder="Tag" value="{{ request.GET.tag }}">
+      <button type="submit" class="btn btn-outline-primary">Search</button>
+    </div>
+  </form>
   <div class="row">
     {% for recipe in recipes %}
       <div class="col-md-4">

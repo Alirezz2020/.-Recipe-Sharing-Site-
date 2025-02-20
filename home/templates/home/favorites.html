@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}My Favorites - RecipeShare{% endblock %}
+
+{% block content %}
+  <h2>My Favorite Recipes</h2>
+  <div class="row">
+    {% for favorite in favorites %}
+      <div class="col-md-4">
+        <div class="card mb-4 shadow-sm">
+          {% if favorite.recipe.image %}
+            <img src="{{ favorite.recipe.image.url }}" class="card-img-top" alt="{{ favorite.recipe.title }}">
+          {% else %}
+            <img src="https://via.placeholder.com/350x200" class="card-img-top" alt="{{ favorite.recipe.title }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ favorite.recipe.title }}</h5>
+            <p class="card-text">{{ favorite.recipe.description|truncatewords:20 }}</p>
+            <a href="{% url 'home:recipe_detail' favorite.recipe.pk %}" class="btn btn-primary">View Recipe</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>You haven't favorited any recipes yet.</p>
+    {% endfor %}
+  </div>
+{% endblock %}

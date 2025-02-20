@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load favorite_extras %}
 
 {% block title %}{{ object.title }} - RecipeShare{% endblock %}
 
@@ -10,11 +11,77 @@
     <div class="card-body">
       <h2>{{ object.title }}</h2>
       <p>{{ object.description }}</p>
+      <p><strong>Category:</strong> {{ object.category }}</p>
+      <p><strong>Tags:</strong> {% for tag in object.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
       <h4>Ingredients</h4>
       <p>{{ object.ingredients }}</p>
       <h4>Instructions</h4>
       <p>{{ object.instructions }}</p>
       <p class="text-muted">Posted by {{ object.author.username }} on {{ object.created_at|date:"F j, Y" }}</p>
+
+      <!-- Social Sharing Buttons -->
+      <div class="social-sharing my-3">
+        <p>Share this recipe:</p>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="btn btn-primary">Facebook</a>
+        <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ object.title }}" target="_blank" class="btn btn-info">Twitter</a>
+        <a href="https://pinterest.com/pin/create/button/?url={{ request.build_absolute_uri }}" target="_blank" class="btn btn-danger">Pinterest</a>
+      </div>
+
+      <!-- Nutritional Information Placeholder -->
+      <div id="nutrition-info" class="mt-4">
+        <h5>Nutritional Information</h5>
+        <p id="nutrition-data">Loading nutritional info...</p>
+      </div>
+
+      <!-- Link to Step-by-Step Mode -->
+      <div class="mt-4">
+        <a href="{% url 'home:recipe_step_by_step' object.pk %}" class="btn btn-secondary">Step-by-Step Mode</a>
+      </div>
     </div>
   </div>
+
+  <!-- Favorite Button -->
+{% if user.is_authenticated %}
+  <form method="post" action="{% url 'home:toggle_favorite' object.pk %}">
+    {% csrf_token %}
+    {% if object|is_favorited_by:user %}
+      <button type="submit" class="btn btn-warning">Remove from Favorites</button>
+    {% else %}
+      <button type="submit" class="btn btn-success">Add to Favorites</button>
+    {% endif %}
+  </form>
+{% endif %}
+
+  <!-- Comments Section -->
+  <div class="comments mt-5">
+    <h4>Comments</h4>
+    {% for comment in object.comments.all %}
+      <div class="card mb-2">
+        <div class="card-body">
+          <p>{{ comment.text }}</p>
+          {% if comment.rating %}
+            <p>Rating: {{ comment.rating }}/5</p>
+          {% endif %}
+          <p class="text-muted">By {{ comment.author.username }} on {{ comment.created_at|date:"F j, Y, g:i a" }}</p>
+        </div>
+      </div>
+    {% empty %}
+      <p>No comments yet.</p>
+    {% endfor %}
+    {% if user.is_authenticated %}
+      <a href="{% url 'home:add_comment' object.pk %}" class="btn btn-primary mt-3">Add Comment</a>
+    {% endif %}
+  </div>
+
+  <!-- Nutritional Info Script -->
+<!-- Nutritional Information provided by the creator -->
+<div id="nutrition-info" class="mt-4">
+  <h5>Nutritional Information</h5>
+  {% if object.nutritional_info %}
+    <p>{{ object.nutritional_info }}</p>
+  {% else %}
+    <p>Nutritional information not provided.</p>
+  {% endif %}
+</div>
+
 {% endblock %}

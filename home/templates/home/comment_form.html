@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Comment - RecipeShare{% endblock %}
+
+{% block content %}
+  <h2>Add Comment</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Submit Comment</button>
+  </form>
+{% endblock %}

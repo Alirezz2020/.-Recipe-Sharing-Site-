@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - RecipeShare{% endblock %}
+
+{% block content %}
+  <h2>Your Notifications</h2>
+  <ul class="list-group">
+    {% for notification in notifications %}
+      <li class="list-group-item {% if not notification.read %}font-weight-bold{% endif %}">
+        <a href="{{ notification.url }}">{{ notification.message }}</a>
+        <small class="text-muted">{{ notification.created_at|date:"F j, Y, g:i a" }}</small>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No notifications yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
