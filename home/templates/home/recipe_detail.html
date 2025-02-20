@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ object.title }} - RecipeShare{% endblock %}
+
+{% block content %}
+  <div class="card mb-4">
+    {% if object.image %}
+      <img src="{{ object.image.url }}" class="card-img-top" alt="{{ object.title }}">
+    {% endif %}
+    <div class="card-body">
+      <h2>{{ object.title }}</h2>
+      <p>{{ object.description }}</p>
+      <h4>Ingredients</h4>
+      <p>{{ object.ingredients }}</p>
+      <h4>Instructions</h4>
+      <p>{{ object.instructions }}</p>
+      <p class="text-muted">Posted by {{ object.author.username }} on {{ object.created_at|date:"F j, Y" }}</p>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Edit Recipe{% else %}Add New Recipe{% endif %} - RecipeShare{% endblock %}
+
+{% block content %}
+  <h2>{% if object %}Edit Recipe{% else %}Add New Recipe{% endif %}</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">{% if object %}Update{% else %}Create{% endif %}</button>
+  </form>
+{% endblock %}
