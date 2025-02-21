@@ -27,12 +27,16 @@
         <a href="https://pinterest.com/pin/create/button/?url={{ request.build_absolute_uri }}" target="_blank" class="btn btn-danger">Pinterest</a>
       </div>
 
-      <!-- Nutritional Information Placeholder -->
-      <div id="nutrition-info" class="mt-4">
-        <h5>Nutritional Information</h5>
-        <p id="nutrition-data">Loading nutritional info...</p>
-      </div>
-
+     <!-- Nutritional Info Script -->
+<!-- Nutritional Information provided by the creator -->
+<div id="nutrition-info" class="mt-4">
+  <h5>Nutritional Information</h5>
+  {% if object.nutritional_info %}
+    <p>{{ object.nutritional_info }}</p>
+  {% else %}
+    <p>Nutritional information not provided.</p>
+  {% endif %}
+</div>
       <!-- Link to Step-by-Step Mode -->
       <div class="mt-4">
         <a href="{% url 'home:recipe_step_by_step' object.pk %}" class="btn btn-secondary">Step-by-Step Mode</a>
@@ -73,15 +77,6 @@
     {% endif %}
   </div>
 
-  <!-- Nutritional Info Script -->
-<!-- Nutritional Information provided by the creator -->
-<div id="nutrition-info" class="mt-4">
-  <h5>Nutritional Information</h5>
-  {% if object.nutritional_info %}
-    <p>{{ object.nutritional_info }}</p>
-  {% else %}
-    <p>Nutritional information not provided.</p>
-  {% endif %}
-</div>
+
 
 {% endblock %}

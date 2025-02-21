@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Category, Tag, Recipe, Comment, Favorite, Notification
+from .models import *
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -35,3 +36,12 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = ('user', 'message', 'read', 'created_at')
     list_filter = ('read', 'created_at', 'user')
     search_fields = ('user__username', 'message')
+
+
+
+# class RecipeStepInline(admin.TabularInline):  # Allows adding steps within the Recipe admin
+#     model = RecipeStep
+#     extra = 1  # Provides an empty field for additional steps
+#
+#
+

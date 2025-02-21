@@ -1,7 +1,10 @@
+from django.http import HttpResponseRedirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
+
+from .forms import *
 from .models import Recipe, Comment, Favorite, Notification
 
 # Public Home view with advanced search/filtering (ordered by newest first)
@@ -43,21 +46,63 @@ class DashboardView(LoginRequiredMixin, ListView):
 class RecipeCreateView(LoginRequiredMixin, CreateView):
     model = Recipe
     template_name = 'home/recipe_form.html'
-    fields = ['title', 'description', 'ingredients', 'instructions', 'image', 'category', 'tags', 'nutritional_info']
+    fields = ['title', 'description', 'ingredients', 'image', 'category', 'tags', 'nutritional_info']
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        if self.request.POST:
+            data['steps'] = StepFormSet(self.request.POST)
+        else:
+            data['steps'] = StepFormSet()
+        return data
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
-
+        context = self.get_context_data()
+        steps = context['steps']
+        if steps.is_valid():
+            self.object = form.save()
+            steps.instance = self.object
+            steps.save()
+            return super().form_valid(form)
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
 
 class RecipeUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Recipe
     template_name = 'home/recipe_form.html'
-    fields = ['title', 'description', 'ingredients', 'instructions', 'image', 'category', 'tags', 'nutritional_info']
+    fields = ['title', 'description', 'ingredients', 'image', 'category', 'tags', 'nutritional_info']
+    success_url = reverse_lazy('home:dashboard')
+
+    def get_success_url(self):
+        return reverse('home:dashboard')
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        if self.request.POST:
+            data['steps'] = StepFormSet(self.request.POST, instance=self.object)
+        else:
+            data['steps'] = StepFormSet(instance=self.object)
+        return data
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        steps = context['steps']
+
+
+
+        if steps.is_valid():
+            form.instance.author = self.request.user
+            self.object = form.save()
+            steps.instance = self.object
+            steps.save()
+            return HttpResponseRedirect(self.get_success_url())  # Force redirect
+        else:
+
+            return self.render_to_response(self.get_context_data(form=form))
 
     def test_func(self):
         return self.get_object().author == self.request.user
-
 
 # Delete recipe view – only allow if user is the recipe's author
 class RecipeDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -98,9 +143,15 @@ class ToggleFavoriteView(LoginRequiredMixin, View):
         return redirect(request.META.get('HTTP_REFERER', 'home:home'))
 
 # Step-by-Step Mode view for interactive recipe instructions
+
 class RecipeStepByStepView(DetailView):
+    """
+    Displays the recipe in a step-by-step manner.
+    Iterates over the related Step objects for the recipe.
+    """
     model = Recipe
     template_name = 'home/recipe_step_by_step.html'
+
 
 # Notifications list view
 class NotificationListView(LoginRequiredMixin, ListView):

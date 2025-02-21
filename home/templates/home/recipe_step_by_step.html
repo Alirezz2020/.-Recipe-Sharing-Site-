@@ -5,29 +5,48 @@
 {% block content %}
   <h2>Step-by-Step Mode: {{ object.title }}</h2>
   <div id="steps">
-    {% for step in object.instructions.splitlines %}
+    {% for step in object.steps.all %}
       <div class="step" style="display: none;">
-        <p>{{ step }}</p>
+        <p><strong>Step {{ step.order }}:</strong> {{ step.description }}</p>
       </div>
+    {% empty %}
+      <p>No step-by-step instructions provided.</p>
     {% endfor %}
   </div>
-  <button id="prev" class="btn btn-secondary">Previous</button>
-  <button id="next" class="btn btn-primary">Next</button>
+
+  <div class="mt-3">
+    <button id="prev" class="btn btn-secondary">Previous</button>
+    <button id="next" class="btn btn-primary">Next</button>
+  </div>
 
   <script>
-    const steps = document.querySelectorAll('.step');
-    let currentStep = 0;
-    function showStep(index) {
-      steps.forEach((step, i) => {
-        step.style.display = (i === index) ? 'block' : 'none';
+    document.addEventListener("DOMContentLoaded", function() {
+      const steps = document.querySelectorAll('.step');
+      let currentStep = 0;
+
+      function showStep(index) {
+        steps.forEach((step, i) => {
+          step.style.display = (i === index) ? 'block' : 'none';
+        });
+      }
+
+      if (steps.length > 0) {
+        showStep(currentStep);
+      }
+
+      document.getElementById('prev').addEventListener('click', function() {
+        if (currentStep > 0) {
+          currentStep--;
+          showStep(currentStep);
+        }
       });
-    }
-    showStep(currentStep);
-    document.getElementById('prev').addEventListener('click', function() {
-      if (currentStep > 0) { currentStep--; showStep(currentStep); }
-    });
-    document.getElementById('next').addEventListener('click', function() {
-      if (currentStep < steps.length - 1) { currentStep++; showStep(currentStep); }
+
+      document.getElementById('next').addEventListener('click', function() {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          showStep(currentStep);
+        }
+      });
     });
   </script>
 {% endblock %}

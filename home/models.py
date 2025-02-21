@@ -20,7 +20,7 @@ class Recipe(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     ingredients = models.TextField()
-    instructions = models.TextField()
+    instructions = models.TextField(blank=True, null=True)  # Optional if using step-by-step
     image = models.ImageField(upload_to='recipe_images/', blank=True, null=True)
     nutritional_info = models.TextField(blank=True, null=True)  # New field for nutritional details
     created_at = models.DateTimeField(auto_now_add=True)
@@ -69,3 +69,14 @@ class Notification(models.Model):
     read = models.BooleanField(default=False)
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message}"
+
+class Step(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='steps')
+    order = models.PositiveIntegerField(default=0)
+    description = models.TextField()
+
+    def __str__(self):
+        return f"Step {self.order} for {self.recipe.title}"
+
+    class Meta:
+        ordering = ['order']

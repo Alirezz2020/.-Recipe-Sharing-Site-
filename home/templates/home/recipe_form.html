@@ -1,12 +1,111 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{% if object %}Edit Recipe{% else %}Add New Recipe{% endif %} - RecipeShare{% endblock %}
 
 {% block content %}
   <h2>{% if object %}Edit Recipe{% else %}Add New Recipe{% endif %}</h2>
+
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">{% if object %}Update{% else %}Create{% endif %}</button>
+
+    <hr>
+    <h4>Step-by-Step Instructions</h4>
+
+    {# Management form for the inline formset #}
+    {{ steps.management_form }}
+
+    {# We'll wrap the step forms in a container for easy cloning #}
+    <div id="formset-container">
+      {% for formset_form in steps %}
+        <div class="formset-form card mb-3 p-3">
+         {{ formset_form.id }}
+          <div class="mb-2">
+            {{ formset_form.order.label_tag }} {{ formset_form.order }}
+          </div>
+          <div class="mb-2">
+            {{ formset_form.description.label_tag }} {{ formset_form.description }}
+          </div>
+          {% if formset_form.instance.pk %}
+            <div class="form-check">
+              {{ formset_form.DELETE }}
+              <label class="form-check-label" for="{{ formset_form.prefix }}-DELETE">
+                Delete this step
+              </label>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    {# Button to dynamically add new blank forms #}
+    <button type="button" class="btn btn-secondary mb-3" id="add-form-btn">
+      + Add Another Step
+    </button>
+
+    <button type="submit" class="btn btn-primary">
+      {% if object %}Update{% else %}Create{% endif %}
+    </button>
   </form>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const formsetContainer = document.getElementById("formset-container");
+      const addFormBtn = document.getElementById("add-form-btn");
+
+      // The TOTAL_FORMS input tells Django how many forms are submitted
+      const totalFormsInput = document.getElementById("id_steps-TOTAL_FORMS");
+
+      // We will clone the first blank form (the last one, or any blank form)
+      // But to be safe, let's get a hidden "template" version, if needed.
+      // If you prefer, you can clone the last actual form if it's blank.
+
+      // We'll identify a "template form" by class or ID.
+      // But here, let's just clone the last child if it's blank.
+      // For reliability, let's create a "template" approach:
+
+      let formCount = parseInt(totalFormsInput.value);
+
+      // If you want to strictly clone the last form, you can do:
+      // let emptyForm = formsetContainer.querySelectorAll('.formset-form')[formCount - 1];
+
+      addFormBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+
+        // We'll clone the FIRST blank form or the last form as a template
+        // The simplest approach is to clone the LAST .formset-form node
+        // as it should be the empty one if you haven't typed anything yet.
+        // If not, we can do a more robust approach: storing an actual hidden template.
+
+        // For now, let's assume we always have at least one blank form at the end:
+        let newForm = formsetContainer
+          .querySelector(".formset-form:last-child")
+          .cloneNode(true);
+
+        // Now we need to clear out any typed data:
+        // We'll also update the prefix from steps-0, steps-1, etc. to steps-formCount
+        const regex = new RegExp(`steps-(\\d+)`, "g");
+        newForm.innerHTML = newForm.innerHTML.replace(regex, `steps-${formCount}`);
+
+        // Clear input values in the newly cloned form
+        let inputs = newForm.querySelectorAll("input, textarea");
+        inputs.forEach((input) => {
+          // If it's the DELETE checkbox, uncheck it
+          if (input.type === "checkbox") {
+            input.checked = false;
+          } else {
+            input.value = "";
+          }
+        });
+
+        // Insert the new form at the bottom
+        formsetContainer.appendChild(newForm);
+
+        // Increment the total form count so Django knows we have an additional form
+        formCount++;
+        totalFormsInput.value = formCount;
+      });
+    });
+  </script>
 {% endblock %}
